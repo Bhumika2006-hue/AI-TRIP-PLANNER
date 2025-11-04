@@ -117,40 +117,7 @@ export default function AdminDashboard({ user, token }) {
             </CardContent>
           </Card>
 
-          <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600">Monthly Revenue</p>
-                  <p className="text-3xl font-bold text-gray-900">₹{stats?.revenue_estimate || 0}</p>
-                </div>
-                <div className="bg-yellow-100 p-3 rounded-lg">
-                  <DollarSign className="w-8 h-8 text-yellow-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
         </div>
-
-        {/* Plan Breakdown */}
-        <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm mb-8">
-          <CardHeader>
-            <CardTitle>Subscription Breakdown</CardTitle>
-            <CardDescription>Users per plan</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid md:grid-cols-3 gap-4">
-              {stats && Object.entries(stats.plan_breakdown).map(([plan, count]) => (
-                <div key={plan} className="p-4 bg-gray-50 rounded-lg">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm font-medium text-gray-700 capitalize">{plan}</span>
-                    <Badge variant="secondary">{count} users</Badge>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
 
         {/* Users List */}
         <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
