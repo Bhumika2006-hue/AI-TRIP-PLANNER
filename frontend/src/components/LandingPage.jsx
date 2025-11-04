@@ -36,15 +36,15 @@ export default function LandingPage({ onAuthClick }) {
             Powered by AI
           </div>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-            Plan Your Perfect Trip
+            Your AI Travel Companion
             <br />
             <span className="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
-              with AI in Minutes
+              Plan Trips in Minutes
             </span>
           </h1>
           <p className="text-lg sm:text-xl text-gray-600 mb-10 max-w-3xl mx-auto leading-relaxed">
-            Get personalized itineraries, budget estimates, and smart recommendations for your dream vacation. 
-            All powered by advanced AI technology.
+            TripGenie creates personalized itineraries, budget estimates, and travel recommendations powered by AI. 
+            Your perfect journey starts here.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
