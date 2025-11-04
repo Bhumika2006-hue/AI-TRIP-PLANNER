@@ -104,7 +104,7 @@ export default function Dashboard({ user, token, onLogout }) {
               </div>
               <div>
                 <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
-                  AI Trip Planner
+                  TripGenie
                 </h1>
                 <p className="text-xs text-gray-600">Welcome back, {user.name}</p>
               </div>
