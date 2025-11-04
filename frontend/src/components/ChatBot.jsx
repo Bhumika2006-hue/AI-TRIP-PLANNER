@@ -97,7 +97,7 @@ export default function ChatBot({ user, token }) {
                 <Bot className="w-6 h-6 text-white" />
               </div>
               <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
-                AI Travel Assistant
+                TripGenie Assistant
               </h1>
             </div>
           </div>
