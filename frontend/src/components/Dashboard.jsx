@@ -176,7 +176,7 @@ export default function Dashboard({ user, token, onLogout }) {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid md:grid-cols-3 gap-4 mb-8">
+        <div className="grid md:grid-cols-2 gap-4 mb-8">
           <Button
             onClick={() => navigate('/plan')}
             className="h-24 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white text-lg shadow-xl"
@@ -193,15 +193,6 @@ export default function Dashboard({ user, token, onLogout }) {
           >
             <MessageSquare className="w-6 h-6 mr-2" />
             AI Travel Assistant
-          </Button>
-          <Button
-            onClick={() => navigate('/pricing')}
-            variant="outline"
-            className="h-24 border-2 border-green-200 hover:bg-green-50 text-lg"
-            data-testid="upgrade-plan-btn"
-          >
-            <CreditCard className="w-6 h-6 mr-2" />
-            {user.subscription_plan === 'free' ? 'Upgrade Plan' : 'Manage Subscription'}
           </Button>
         </div>
 
