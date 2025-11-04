@@ -99,7 +99,7 @@ export default function TripPlanner({ user, token }) {
                 <Plane className="w-6 h-6 text-white" />
               </div>
               <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
-                Plan Your Trip
+                TripGenie - Plan Your Trip
               </h1>
             </div>
           </div>
