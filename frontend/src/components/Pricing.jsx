@@ -153,7 +153,7 @@ export default function Pricing({ user, token }) {
           }
         };
 
-        const razorpayInstance = new Razorpay(options);
+        const razorpayInstance = new window.Razorpay(options);
         razorpayInstance.open();
       }
     } catch (error) {
