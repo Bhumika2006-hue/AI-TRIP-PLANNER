@@ -71,3 +71,8 @@ input, textarea, select {
   font-weight: 600;
   color: #374151;
 }
+
+/* Smooth scroll */
+html {
+  scroll-behavior: smooth;
+}
