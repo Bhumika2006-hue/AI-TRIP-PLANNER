@@ -131,16 +131,16 @@ export default function Dashboard({ user, token, onLogout }) {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats Cards */}
-        <div className="grid md:grid-cols-4 gap-4 mb-8">
+        <div className="grid md:grid-cols-3 gap-4 mb-8">
           <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600">Current Plan</p>
-                  <p className="text-2xl font-bold text-gray-900 capitalize">{user.subscription_plan}</p>
+                  <p className="text-sm text-gray-600">Total Trips</p>
+                  <p className="text-2xl font-bold text-gray-900">{trips.length}</p>
                 </div>
-                <div className="bg-blue-100 p-3 rounded-lg">
-                  <CreditCard className="w-6 h-6 text-blue-600" />
+                <div className="bg-cyan-100 p-3 rounded-lg">
+                  <Plane className="w-6 h-6 text-cyan-600" />
                 </div>
               </div>
             </CardContent>
@@ -150,22 +150,8 @@ export default function Dashboard({ user, token, onLogout }) {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600">Trips This Month</p>
-                  <p className="text-2xl font-bold text-gray-900">{tripUsage}</p>
-                </div>
-                <div className="bg-green-100 p-3 rounded-lg">
-                  <MapPin className="w-6 h-6 text-green-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600">AI Chats</p>
-                  <p className="text-2xl font-bold text-gray-900">{chatUsage}</p>
+                  <p className="text-sm text-gray-600">AI Conversations</p>
+                  <p className="text-2xl font-bold text-gray-900">Unlimited</p>
                 </div>
                 <div className="bg-purple-100 p-3 rounded-lg">
                   <MessageSquare className="w-6 h-6 text-purple-600" />
@@ -178,11 +164,11 @@ export default function Dashboard({ user, token, onLogout }) {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600">Total Trips</p>
-                  <p className="text-2xl font-bold text-gray-900">{trips.length}</p>
+                  <p className="text-sm text-gray-600">Member Since</p>
+                  <p className="text-lg font-bold text-gray-900">{new Date(user.created_at).toLocaleDateString()}</p>
                 </div>
-                <div className="bg-cyan-100 p-3 rounded-lg">
-                  <Plane className="w-6 h-6 text-cyan-600" />
+                <div className="bg-green-100 p-3 rounded-lg">
+                  <MapPin className="w-6 h-6 text-green-600" />
                 </div>
               </div>
             </CardContent>
