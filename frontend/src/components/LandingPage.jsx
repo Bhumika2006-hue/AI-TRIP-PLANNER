@@ -165,7 +165,7 @@ export default function LandingPage({ onAuthClick }) {
             <span className="text-xl font-bold text-white">TripGenie</span>
           </div>
           <p className="text-sm mb-4">Powered by advanced AI technology</p>
-          <p className="text-xs">&copy; 2025 AI Trip Planner. All rights reserved.</p>
+          <p className="text-xs">&copy; 2025 TripGenie. All rights reserved.</p>
         </div>
       </footer>
     </div>
