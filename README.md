@@ -1,1 +1,1 @@
-# Here are your Instructions
+# TRIPGENIE - AI TRIP PLANNER
