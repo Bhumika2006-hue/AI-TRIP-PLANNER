@@ -142,14 +142,8 @@ export default function AdminDashboard({ user, token }) {
                         </div>
                         <p className="text-sm text-gray-600 mb-2">{u.email}</p>
                         <div className="flex flex-wrap gap-2 text-xs">
-                          <Badge variant="outline" className="capitalize">
-                            {u.subscription_plan}
-                          </Badge>
                           <Badge variant="outline">
-                            {u.trips_this_month} trips this month
-                          </Badge>
-                          <Badge variant="outline">
-                            {u.chats_this_month} chats this month
+                            Joined: {new Date(u.created_at).toLocaleDateString()}
                           </Badge>
                         </div>
                       </div>
