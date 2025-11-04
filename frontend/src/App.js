@@ -87,9 +87,6 @@ function App() {
           <Route path="/chat" element={
             user ? <ChatBot user={user} token={token} /> : <Navigate to="/" />
           } />
-          <Route path="/pricing" element={
-            user ? <Pricing user={user} token={token} /> : <Navigate to="/" />
-          } />
           <Route path="/admin" element={
             user && user.is_admin ? <AdminDashboard user={user} token={token} /> : <Navigate to="/" />
           } />
