@@ -10,7 +10,6 @@ import AuthModal from "@/components/AuthModal";
 import Dashboard from "@/components/Dashboard";
 import TripPlanner from "@/components/TripPlanner";
 import ChatBot from "@/components/ChatBot";
-import Pricing from "@/components/Pricing";
 import AdminDashboard from "@/components/AdminDashboard";
 import SharedTrip from "@/components/SharedTrip";
 
