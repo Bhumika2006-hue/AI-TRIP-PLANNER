@@ -13,8 +13,6 @@ from datetime import datetime, timezone, timedelta
 from emergentintegrations.llm.chat import LlmChat, UserMessage
 import bcrypt
 import jwt
-import razorpay
-from enum import Enum
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -29,33 +27,10 @@ JWT_SECRET = os.environ.get('JWT_SECRET', 'your-secret-key-change-in-production'
 JWT_ALGORITHM = "HS256"
 JWT_EXPIRATION_HOURS = 24 * 7  # 7 days
 
-# Razorpay Configuration
-RAZORPAY_KEY_ID = os.environ.get('RAZORPAY_KEY_ID', '')
-RAZORPAY_KEY_SECRET = os.environ.get('RAZORPAY_KEY_SECRET', '')
-razorpay_client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET)) if RAZORPAY_KEY_ID else None
-
 # Create the main app
 app = FastAPI()
 api_router = APIRouter(prefix="/api")
 security = HTTPBearer()
-
-# Subscription Plans
-class SubscriptionPlan(str, Enum):
-    FREE = "free"
-    PRO = "pro"
-    ENTERPRISE = "enterprise"
-
-PLAN_LIMITS = {
-    SubscriptionPlan.FREE: {"trips_per_month": 2, "ai_chats": 10, "collaborators": 0},
-    SubscriptionPlan.PRO: {"trips_per_month": -1, "ai_chats": -1, "collaborators": 5},
-    SubscriptionPlan.ENTERPRISE: {"trips_per_month": -1, "ai_chats": -1, "collaborators": -1}
-}
-
-PLAN_PRICES = {
-    SubscriptionPlan.FREE: 0,
-    SubscriptionPlan.PRO: 49900,  # ₹499 in paise
-    SubscriptionPlan.ENTERPRISE: 199900  # ₹1999 in paise
-}
 
 # Models
 class UserCreate(BaseModel):
@@ -72,11 +47,6 @@ class User(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     email: EmailStr
     name: str
-    subscription_plan: SubscriptionPlan = SubscriptionPlan.FREE
-    subscription_active: bool = True
-    subscription_expires: Optional[datetime] = None
-    trips_this_month: int = 0
-    chats_this_month: int = 0
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     is_admin: bool = False
 
@@ -113,9 +83,6 @@ class ChatMessage(BaseModel):
     message: str
     response: str
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-
-class SubscriptionUpdate(BaseModel):
-    plan: SubscriptionPlan
 
 class Notification(BaseModel):
     model_config = ConfigDict(extra="ignore")
@@ -162,24 +129,8 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
     
     if isinstance(user_doc.get('created_at'), str):
         user_doc['created_at'] = datetime.fromisoformat(user_doc['created_at'])
-    if isinstance(user_doc.get('subscription_expires'), str):
-        user_doc['subscription_expires'] = datetime.fromisoformat(user_doc['subscription_expires'])
     
     return User(**user_doc)
-
-async def check_plan_limits(user: User, action: str) -> bool:
-    limits = PLAN_LIMITS[user.subscription_plan]
-    
-    if action == "trip":
-        if limits["trips_per_month"] == -1:
-            return True
-        return user.trips_this_month < limits["trips_per_month"]
-    elif action == "chat":
-        if limits["ai_chats"] == -1:
-            return True
-        return user.chats_this_month < limits["ai_chats"]
-    
-    return False
 
 async def create_notification(user_id: str, title: str, message: str, notif_type: str = "info"):
     notif = Notification(user_id=user_id, title=title, message=message, type=notif_type)
@@ -205,7 +156,7 @@ async def register(user_data: UserCreate):
     
     token = create_token(user.id)
     
-    await create_notification(user.id, "Welcome!", f"Welcome to AI Trip Planner, {user.name}!", "success")
+    await create_notification(user.id, "Welcome to TripGenie!", f"Start planning your perfect trip, {user.name}!", "success")
     
     return {"user": user.model_dump(), "token": token}
 
@@ -220,8 +171,6 @@ async def login(credentials: UserLogin):
     
     if isinstance(user_doc.get('created_at'), str):
         user_doc['created_at'] = datetime.fromisoformat(user_doc['created_at'])
-    if isinstance(user_doc.get('subscription_expires'), str):
-        user_doc['subscription_expires'] = datetime.fromisoformat(user_doc['subscription_expires'])
     
     user = User(**{k: v for k, v in user_doc.items() if k != 'password'})
     token = create_token(user.id)
@@ -235,9 +184,6 @@ async def get_me(current_user: User = Depends(get_current_user)):
 # Trip Routes
 @api_router.post("/trips")
 async def create_trip(trip_request: TripRequest, current_user: User = Depends(get_current_user)):
-    if not await check_plan_limits(current_user, "trip"):
-        raise HTTPException(status_code=403, detail=f"Trip limit reached for {current_user.subscription_plan} plan. Upgrade to create more trips.")
-    
     try:
         api_key = os.environ.get('EMERGENT_LLM_KEY')
         session_id = f"trip-{uuid.uuid4()}"
@@ -296,12 +242,6 @@ async def create_trip(trip_request: TripRequest, current_user: User = Depends(ge
         doc['updated_at'] = doc['updated_at'].isoformat()
         
         await db.trips.insert_one(doc)
-        
-        # Update user trip count
-        await db.users.update_one(
-            {"id": current_user.id},
-            {"$inc": {"trips_this_month": 1}}
-        )
         
         await create_notification(
             current_user.id,
@@ -385,9 +325,6 @@ async def get_shared_trip(share_token: str):
 # Chat Routes
 @api_router.post("/chat")
 async def chat(message: dict, current_user: User = Depends(get_current_user)):
-    if not await check_plan_limits(current_user, "chat"):
-        raise HTTPException(status_code=403, detail=f"Chat limit reached for {current_user.subscription_plan} plan. Upgrade for unlimited chats.")
-    
     try:
         api_key = os.environ.get('EMERGENT_LLM_KEY')
         session_id = f"chat-{current_user.id}"
@@ -410,8 +347,6 @@ async def chat(message: dict, current_user: User = Depends(get_current_user)):
         doc['created_at'] = doc['created_at'].isoformat()
         await db.chats.insert_one(doc)
         
-        await db.users.update_one({"id": current_user.id}, {"$inc": {"chats_this_month": 1}})
-        
         return chat_msg
     except Exception as e:
         logging.error(f"Error in chat: {str(e)}")
@@ -426,96 +361,6 @@ async def get_chat_history(current_user: User = Depends(get_current_user)):
             chat['created_at'] = datetime.fromisoformat(chat['created_at'])
     
     return chats
-
-# Subscription Routes
-@api_router.post("/subscription/create-order")
-async def create_subscription_order(plan_data: SubscriptionUpdate, current_user: User = Depends(get_current_user)):
-    if not razorpay_client:
-        # Mock payment for development
-        return {
-            "order_id": f"order_mock_{uuid.uuid4()}",
-            "amount": PLAN_PRICES[plan_data.plan],
-            "currency": "INR",
-            "mock": True
-        }
-    
-    try:
-        order = razorpay_client.order.create({
-            "amount": PLAN_PRICES[plan_data.plan],
-            "currency": "INR",
-            "payment_capture": 1
-        })
-        return order
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@api_router.post("/subscription/verify")
-async def verify_subscription(payment_data: dict, current_user: User = Depends(get_current_user)):
-    # For mock/development (when Razorpay keys not configured)
-    if payment_data.get('mock'):
-        plan = SubscriptionPlan(payment_data['plan'])
-        expires = datetime.now(timezone.utc) + timedelta(days=30)
-        
-        await db.users.update_one(
-            {"id": current_user.id},
-            {"$set": {
-                "subscription_plan": plan,
-                "subscription_active": True,
-                "subscription_expires": expires.isoformat(),
-                "trips_this_month": 0,
-                "chats_this_month": 0
-            }}
-        )
-        
-        await create_notification(
-            current_user.id,
-            "Subscription Upgraded!",
-            f"Welcome to {plan.upper()} plan! (Demo Mode)",
-            "success"
-        )
-        
-        return {"success": True, "plan": plan, "expires": expires}
-    
-    # Real Razorpay verification
-    if razorpay_client and payment_data.get('razorpay_payment_id'):
-        try:
-            # Verify payment signature
-            params = {
-                'razorpay_order_id': payment_data['razorpay_order_id'],
-                'razorpay_payment_id': payment_data['razorpay_payment_id'],
-                'razorpay_signature': payment_data['razorpay_signature']
-            }
-            
-            razorpay_client.utility.verify_payment_signature(params)
-            
-            # Update subscription
-            plan = SubscriptionPlan(payment_data['plan'])
-            expires = datetime.now(timezone.utc) + timedelta(days=30)
-            
-            await db.users.update_one(
-                {"id": current_user.id},
-                {"$set": {
-                    "subscription_plan": plan,
-                    "subscription_active": True,
-                    "subscription_expires": expires.isoformat(),
-                    "trips_this_month": 0,
-                    "chats_this_month": 0
-                }}
-            )
-            
-            await create_notification(
-                current_user.id,
-                "Payment Successful!",
-                f"Your {plan.upper()} subscription is now active!",
-                "success"
-            )
-            
-            return {"success": True, "plan": plan, "expires": expires}
-        except Exception as e:
-            logging.error(f"Razorpay verification error: {str(e)}")
-            raise HTTPException(status_code=400, detail="Payment verification failed")
-    
-    return {"success": False, "message": "Invalid payment data"}
 
 # Notification Routes
 @api_router.get("/notifications")
@@ -549,20 +394,10 @@ async def get_admin_stats(current_user: User = Depends(get_current_user)):
     total_trips = await db.trips.count_documents({})
     total_chats = await db.chats.count_documents({})
     
-    plan_breakdown = {}
-    for plan in SubscriptionPlan:
-        count = await db.users.count_documents({"subscription_plan": plan})
-        plan_breakdown[plan] = count
-    
     return {
         "total_users": total_users,
         "total_trips": total_trips,
-        "total_chats": total_chats,
-        "plan_breakdown": plan_breakdown,
-        "revenue_estimate": (
-            plan_breakdown.get(SubscriptionPlan.PRO, 0) * 499 +
-            plan_breakdown.get(SubscriptionPlan.ENTERPRISE, 0) * 1999
-        )
+        "total_chats": total_chats
     }
 
 @api_router.get("/admin/users")
@@ -575,15 +410,13 @@ async def get_all_users(current_user: User = Depends(get_current_user)):
     for user in users:
         if isinstance(user.get('created_at'), str):
             user['created_at'] = datetime.fromisoformat(user['created_at'])
-        if isinstance(user.get('subscription_expires'), str):
-            user['subscription_expires'] = datetime.fromisoformat(user['subscription_expires'])
     
     return users
 
 # Health check
 @api_router.get("/")
 async def root():
-    return {"message": "AI Trip Planner SaaS API", "version": "2.0"}
+    return {"message": "TripGenie API - Your AI Travel Companion", "version": "2.0"}
 
 app.include_router(api_router)
 
