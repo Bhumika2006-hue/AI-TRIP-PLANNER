@@ -13,7 +13,14 @@ const API = `${BACKEND_URL}/api`;
 export default function Pricing({ user, token }) {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(null);
-  const [Razorpay, isLoaded] = useRazorpay();
+  const [razorpayLoaded, setRazorpayLoaded] = useState(false);
+
+  useEffect(() => {
+    // Check if Razorpay script is loaded
+    if (typeof window !== 'undefined' && window.Razorpay) {
+      setRazorpayLoaded(true);
+    }
+  }, []);
 
   const plans = [
     {
