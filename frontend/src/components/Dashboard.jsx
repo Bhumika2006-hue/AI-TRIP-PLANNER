@@ -82,16 +82,6 @@ export default function Dashboard({ user, token, onLogout }) {
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
-  const planLimits = {
-    free: { trips: 2, chats: 10 },
-    pro: { trips: -1, chats: -1 },
-    enterprise: { trips: -1, chats: -1 }
-  };
-
-  const currentLimits = planLimits[user.subscription_plan];
-  const tripUsage = currentLimits.trips === -1 ? 'Unlimited' : `${user.trips_this_month}/${currentLimits.trips}`;
-  const chatUsage = currentLimits.chats === -1 ? 'Unlimited' : `${user.chats_this_month}/${currentLimits.chats}`;
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-cyan-50 to-teal-50">
       {/* Header */}
