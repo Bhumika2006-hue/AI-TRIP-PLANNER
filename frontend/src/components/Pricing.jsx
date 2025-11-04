@@ -85,8 +85,8 @@ export default function Pricing({ user, token }) {
       return;
     }
 
-    if (!isLoaded) {
-      toast.error('Payment system loading...');
+    if (!razorpayLoaded) {
+      toast.error('Payment system loading. Please wait...');
       return;
     }
 
