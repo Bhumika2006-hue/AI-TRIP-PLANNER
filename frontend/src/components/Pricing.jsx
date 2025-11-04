@@ -6,7 +6,6 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, CheckCircle, Loader2, Crown } from "lucide-react";
 import axios from "axios";
 import { toast } from "sonner";
-import useRazorpay from "react-razorpay";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
