@@ -138,69 +138,6 @@ export default function LandingPage({ onAuthClick }) {
         </div>
       </section>
 
-      {/* Pricing Preview */}
-      <section className="py-20 px-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">Simple, Transparent Pricing</h2>
-            <p className="text-lg text-gray-600">Choose the perfect plan for your travel needs</p>
-          </div>
-          
-          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            {[
-              {
-                name: "Free",
-                price: "₹0",
-                period: "forever",
-                features: ["2 trip plans/month", "10 AI chats", "Basic features", "Community support"]
-              },
-              {
-                name: "Pro",
-                price: "₹499",
-                period: "per month",
-                features: ["Unlimited trips", "Unlimited AI chats", "Hotel & flight integration", "Priority support"],
-                popular: true
-              },
-              {
-                name: "Enterprise",
-                price: "₹1,999",
-                period: "per month",
-                features: ["Everything in Pro", "Custom branding", "API access", "Advanced analytics"]
-              }
-            ].map((plan, index) => (
-              <Card key={index} className={`border-0 shadow-lg hover:shadow-2xl transition-all ${plan.popular ? 'ring-2 ring-blue-500 scale-105' : ''} bg-white/80 backdrop-blur-sm relative`}>
-                {plan.popular && (
-                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                    <span className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-4 py-1 rounded-full text-sm font-semibold">Most Popular</span>
-                  </div>
-                )}
-                <CardContent className="p-8">
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">{plan.name}</h3>
-                  <div className="mb-6">
-                    <span className="text-4xl font-bold text-gray-900">{plan.price}</span>
-                    <span className="text-gray-600 ml-2">{plan.period}</span>
-                  </div>
-                  <ul className="space-y-3 mb-6">
-                    {plan.features.map((feature, i) => (
-                      <li key={i} className="flex items-center text-gray-700">
-                        <CheckCircle className="w-5 h-5 text-green-500 mr-2 flex-shrink-0" />
-                        <span className="text-sm">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <Button 
-                    onClick={onAuthClick}
-                    className={`w-full ${plan.popular ? 'bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-900'}`}
-                  >
-                    Get Started
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* CTA Section */}
       <section className="py-20 px-4 bg-gradient-to-r from-blue-500 to-cyan-500">
         <div className="max-w-4xl mx-auto text-center">
