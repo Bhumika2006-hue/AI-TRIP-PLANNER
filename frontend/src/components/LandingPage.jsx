@@ -162,7 +162,7 @@ export default function LandingPage({ onAuthClick }) {
             <div className="bg-gradient-to-br from-blue-500 to-cyan-500 p-2 rounded-lg">
               <Plane className="w-5 h-5 text-white" />
             </div>
-            <span className="text-xl font-bold text-white">AI Trip Planner</span>
+            <span className="text-xl font-bold text-white">TripGenie</span>
           </div>
           <p className="text-sm mb-4">Powered by advanced AI technology</p>
           <p className="text-xs">&copy; 2025 AI Trip Planner. All rights reserved.</p>
