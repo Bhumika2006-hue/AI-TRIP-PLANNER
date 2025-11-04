@@ -14,6 +14,7 @@ const API = `${BACKEND_URL}/api`;
 export default function Pricing({ user, token }) {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(null);
+  const [Razorpay, isLoaded] = useRazorpay();
 
   const plans = [
     {
