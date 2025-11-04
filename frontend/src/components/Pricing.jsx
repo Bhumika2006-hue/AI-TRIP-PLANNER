@@ -79,6 +79,11 @@ export default function Pricing({ user, token }) {
       return;
     }
 
+    if (!isLoaded) {
+      toast.error('Payment system loading...');
+      return;
+    }
+
     setLoading(planId);
     try {
       // Create order
@@ -88,8 +93,10 @@ export default function Pricing({ user, token }) {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      if (orderResponse.data.mock) {
-        // Mock payment for development
+      const { order_id, amount, currency, mock } = orderResponse.data;
+
+      if (mock) {
+        // Mock payment for development (when Razorpay keys not configured)
         await axios.post(
           `${API}/subscription/verify`,
           { mock: true, plan: planId },
@@ -98,13 +105,54 @@ export default function Pricing({ user, token }) {
         toast.success(`Upgraded to ${planId.toUpperCase()} plan!`);
         setTimeout(() => window.location.reload(), 1500);
       } else {
-        // Real Razorpay payment would be initialized here
-        toast.info('Payment integration coming soon');
+        // Real Razorpay payment
+        const options = {
+          key: 'rzp_test_demo', // This will be replaced by backend key
+          amount: amount,
+          currency: currency,
+          name: 'AI Trip Planner',
+          description: `${planId.toUpperCase()} Plan Subscription`,
+          order_id: order_id,
+          handler: async (response) => {
+            try {
+              // Verify payment
+              await axios.post(
+                `${API}/subscription/verify`,
+                {
+                  razorpay_order_id: response.razorpay_order_id,
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_signature: response.razorpay_signature,
+                  plan: planId
+                },
+                { headers: { Authorization: `Bearer ${token}` } }
+              );
+              toast.success(`Successfully upgraded to ${planId.toUpperCase()} plan!`);
+              setTimeout(() => window.location.reload(), 1500);
+            } catch (error) {
+              toast.error('Payment verification failed');
+            }
+          },
+          prefill: {
+            name: user.name,
+            email: user.email
+          },
+          theme: {
+            color: '#3b82f6'
+          },
+          modal: {
+            ondismiss: () => {
+              setLoading(null);
+              toast.info('Payment cancelled');
+            }
+          }
+        };
+
+        const razorpayInstance = new Razorpay(options);
+        razorpayInstance.open();
       }
     } catch (error) {
       const errorMsg = error.response?.data?.detail || 'Upgrade failed';
       toast.error(errorMsg);
-    } finally {
       setLoading(null);
     }
   };
