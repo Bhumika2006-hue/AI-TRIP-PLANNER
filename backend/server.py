@@ -451,7 +451,7 @@ async def create_subscription_order(plan_data: SubscriptionUpdate, current_user:
 
 @api_router.post("/subscription/verify")
 async def verify_subscription(payment_data: dict, current_user: User = Depends(get_current_user)):
-    # For mock/development
+    # For mock/development (when Razorpay keys not configured)
     if payment_data.get('mock'):
         plan = SubscriptionPlan(payment_data['plan'])
         expires = datetime.now(timezone.utc) + timedelta(days=30)
@@ -470,14 +470,52 @@ async def verify_subscription(payment_data: dict, current_user: User = Depends(g
         await create_notification(
             current_user.id,
             "Subscription Upgraded!",
-            f"Welcome to {plan.upper()} plan!",
+            f"Welcome to {plan.upper()} plan! (Demo Mode)",
             "success"
         )
         
         return {"success": True, "plan": plan, "expires": expires}
     
-    # Real Razorpay verification would go here
-    return {"success": True}
+    # Real Razorpay verification
+    if razorpay_client and payment_data.get('razorpay_payment_id'):
+        try:
+            # Verify payment signature
+            params = {
+                'razorpay_order_id': payment_data['razorpay_order_id'],
+                'razorpay_payment_id': payment_data['razorpay_payment_id'],
+                'razorpay_signature': payment_data['razorpay_signature']
+            }
+            
+            razorpay_client.utility.verify_payment_signature(params)
+            
+            # Update subscription
+            plan = SubscriptionPlan(payment_data['plan'])
+            expires = datetime.now(timezone.utc) + timedelta(days=30)
+            
+            await db.users.update_one(
+                {"id": current_user.id},
+                {"$set": {
+                    "subscription_plan": plan,
+                    "subscription_active": True,
+                    "subscription_expires": expires.isoformat(),
+                    "trips_this_month": 0,
+                    "chats_this_month": 0
+                }}
+            )
+            
+            await create_notification(
+                current_user.id,
+                "Payment Successful!",
+                f"Your {plan.upper()} subscription is now active!",
+                "success"
+            )
+            
+            return {"success": True, "plan": plan, "expires": expires}
+        except Exception as e:
+            logging.error(f"Razorpay verification error: {str(e)}")
+            raise HTTPException(status_code=400, detail="Payment verification failed")
+    
+    return {"success": False, "message": "Invalid payment data"}
 
 # Notification Routes
 @api_router.get("/notifications")
